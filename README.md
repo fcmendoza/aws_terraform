@@ -12,6 +12,7 @@ $ echo "secret_key = \"MYSECRETKEYGOESHERE\"" >> secret.tfvars
 Then plan and run terraform:
 
 ```bash
+$ terraform init
 $ terraform plan -var-file="secret.tfvars"
 $ terraform apply -var-file="secret.tfvars"
 ```
