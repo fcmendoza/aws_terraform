@@ -1,0 +1,4 @@
+[apache]
+13.56.19.160 ansible_ssh_user=ubuntu
+ec2-13-56-19-160.us-west-1.compute.amazonaws.com ansible_ssh_user=ubuntu
+54.183.200.237 ansible_ssh_user=ubuntu
