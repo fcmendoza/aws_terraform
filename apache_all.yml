@@ -6,5 +6,5 @@
       apt: name=apache2 update_cache=yes state=latest
 
 # run like this from the terminal
-# $ ansible-playbook --private-key ~/my_ore_keypair.pem -i '13.56.19.160,' apache_all.yml
+# $ ansible-playbook -u ubuntu --private-key ~/my_ore_keypair.pem -i '13.52.103.77,' apache_all.yml
 # $ ansible-playbook -u ubuntu --private-key ~/.ssh/my_rsa_dos -i '54.183.200.237,' apache_all.yml
