@@ -1,0 +1,19 @@
+---
+
+- name: Install Ubuntu Desktop
+  apt:
+    name: lxde
+    state: latest
+    update_cache: yes
+
+- name: Install Remote Desktop Server
+  apt:
+    name: xrdp
+    state: latest
+    update_cache: yes
+
+- name: Install VNC Server (whatever that is for)
+  apt:
+    name: vnc4server
+    state: latest
+    update_cache: yes
