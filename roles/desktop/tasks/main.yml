@@ -17,3 +17,9 @@
     name: vnc4server
     state: latest
     update_cache: yes
+
+- name: Change Ubuntu User Password
+  user:
+    name: ubuntu
+    update_password: always
+    password: $1$SomeSalt$MTrfjA4WXc7dNfN6/aitu0
