@@ -41,3 +41,35 @@
     dest: /home/ubuntu/tunesc
     version: master
 
+- name: Copy Main Executable Script to Home Directory.
+  copy:
+    src: /home/ubuntu/tunesc/youtubesc.sh
+    dest: /home/ubuntu/youtubesc.sh
+    remote_src: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: u+x
+
+- name: Copy Needed Files to Home Directory.
+  copy:
+    src: /home/ubuntu/tunesc/cookies.txt
+    dest: /home/ubuntu/cookies.txt
+    remote_src: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: 0644
+
+- name: Copy Main Service to Systemd Directory.
+  copy:
+    src: /home/ubuntu/tunesc/youtubedl.service
+    dest: /lib/systemd/system/youtubedl.service
+    remote_src: yes
+    owner: root
+    group: root
+    #mode: -rw-r--r--
+
+- name: Restart Main Service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: youtubedl
