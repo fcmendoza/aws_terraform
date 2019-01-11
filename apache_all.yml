@@ -2,8 +2,9 @@
 - hosts: all
   become: yes
   roles:
-    - apache
-    - desktop
+    #- apache
+    #- desktop
+    - dl
 
 # run like this from the terminal
 # $ ansible-playbook -u ubuntu --private-key ~/my_ore_keypair.pem -i '13.52.103.77,' apache_all.yml

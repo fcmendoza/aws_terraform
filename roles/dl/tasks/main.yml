@@ -1,0 +1,43 @@
+---
+
+- name: Install Pip
+  apt:
+    name: python-pip
+    state: latest
+    update_cache: yes
+
+- name: Installing youtube-dl using Ansible pip module
+  pip:
+    name: youtube-dl 
+
+- name: Download Dropbox 
+  get_url: url=https://www.dropbox.com/download?plat=lnx.x86_64 
+           dest=/home/ubuntu
+
+- name: Download script to manage Dropbox
+  get_url: url=https://www.dropbox.com/download?dl=packages/dropbox.py 
+           dest=/home/ubuntu/dropbox.py 
+
+- name: Extract dropbox-lnx.x86_64-64.4.141.tar.gz into /home/ubuntu
+  unarchive:
+    src: /home/ubuntu/dropbox-lnx.x86_64-64.4.141.tar.gz
+    dest: /home/ubuntu
+    remote_src: yes
+
+- name: Create Directory
+  file:
+    path: /home/ubuntu/Dropbox/Videos/Yotevi
+    state: directory
+
+- name: Install Git
+  apt:
+    name: git
+    state: latest
+    update_cache: yes
+
+- name: Get files via Git
+  git:
+    repo: 'https://github.com/fcmendoza/tubesc.git'
+    dest: /home/ubuntu/tunesc
+    version: master
+
