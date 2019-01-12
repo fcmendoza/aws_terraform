@@ -51,7 +51,7 @@
     group: ubuntu
     mode: u+x
 
-- name: Copy Needed Files to Home Directory.
+- name: Copy Cookies File to Home Directory.
   copy:
     src: /home/ubuntu/tunesc/cookies.txt
     dest: /home/ubuntu/cookies.txt
@@ -60,7 +60,7 @@
     group: ubuntu
     mode: 0644
 
-- name: Copy dot files Home Directory
+- name: Copy dot Files to Home Directory
   copy:
     src: /home/ubuntu/tunesc/.bash_aliases
     dest: /home/ubuntu/.bash_aliases
@@ -87,8 +87,18 @@
     name: youtubedl
     enabled: yes
 
-#- name: Run Dropbox as user ubuntu
-#  command: "python ~/dropbox.py start"
-#    become: yes
-#    become_user: ubuntu
+- name: Run Dropbox as user ubuntu
+  shell: "python ~/dropbox.py start"
+  become: yes
+  become_user: ubuntu
+  register: hello
 
+- debug: msg="{{ hello.stdout }}"
+
+# Last steps manual:
+#
+# python ~/dropbox.py start # once to run the service
+# python ~/dropbox.py start # again to get url for adding IP to whitelist.
+# cd ~/Dropbox
+# Run the following to remove all folders except Videos/ from syncing:
+# python ~/dropbox.py exclude add baretail/ baretailpro/ bc3/ bc4/ BeyondCompare/ BookNotes/ Books/ Camera\ Uploads/ colorpic/ DropboxApi/ Esad/ Express/ iOSdev/ Isos/ js_tests/ MarkPad/ minime/ Notes/ oem/ OneNote\ Notebooks/ Pictures/ Public/ titulo\ uanl/ TrackinForm/ Music/ Windirstat/ WindowTabs/ _Root/ 

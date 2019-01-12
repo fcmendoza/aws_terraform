@@ -10,7 +10,7 @@ resource "aws_instance" "example" {
   key_name = "my_ore_keypair"
 
   tags = {
-    Name = "terransibuntupache"
+    Name = "terransibuntudl"
   }
   root_block_device = {
     volume_size = 16
