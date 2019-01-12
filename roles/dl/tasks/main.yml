@@ -14,9 +14,14 @@
   get_url: url=https://www.dropbox.com/download?plat=lnx.x86_64 
            dest=/home/ubuntu
 
-- name: Download script to manage Dropbox
+- name: Download Script to Manage Dropbox
   get_url: url=https://www.dropbox.com/download?dl=packages/dropbox.py 
-           dest=/home/ubuntu/dropbox.py 
+           dest=/usr/local/bin/dropbox
+
+- name: Make Dropbox Script Executable 
+  file: 
+    path: /usr/local/bin/dropbox
+    mode: +x
 
 - name: Extract dropbox-lnx.x86_64-64.4.141.tar.gz into /home/ubuntu
   unarchive:
@@ -68,6 +73,14 @@
     owner: ubuntu
     group: ubuntu
 
+- name: Copy varchive to Home Directory
+  copy:
+    src: /home/ubuntu/tunesc/varchive.txt
+    dest: /home/ubuntu/varchive.txt
+    remote_src: yes
+    owner: ubuntu
+    group: ubuntu
+
 - name: Copy Main Service to Systemd Directory.
   copy:
     src: /home/ubuntu/tunesc/youtubedl.service
@@ -87,18 +100,37 @@
     name: youtubedl
     enabled: yes
 
-- name: Run Dropbox as user ubuntu
-  shell: "python ~/dropbox.py start"
+- name: Copy Dropbox Service to Systemd Directory
+  copy:
+    src: /home/ubuntu/tunesc/dropbox.service
+    dest: /lib/systemd/system/dropbox.service
+    remote_src: yes
+
+- name: Start/Restart Dropbox Service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: dropbox
+
+- name: Enable Dropbox Service
+  systemd:
+    name: dropbox
+    enabled: yes
+
+- name: Get Dropbox Status
+  shell: "dropbox status"
   become: yes
   become_user: ubuntu
   register: hello
 
 - debug: msg="{{ hello.stdout }}"
 
-# Last steps manual:
-#
-# python ~/dropbox.py start # once to run the service
-# python ~/dropbox.py start # again to get url for adding IP to whitelist.
+# After Dropbox has been installed as a systemd service we can now perform the following simplified steps:
+
 # cd ~/Dropbox
-# Run the following to remove all folders except Videos/ from syncing:
-# python ~/dropbox.py exclude add baretail/ baretailpro/ bc3/ bc4/ BeyondCompare/ BookNotes/ Books/ Camera\ Uploads/ colorpic/ DropboxApi/ Esad/ Express/ iOSdev/ Isos/ js_tests/ MarkPad/ minime/ Notes/ oem/ OneNote\ Notebooks/ Pictures/ Public/ titulo\ uanl/ TrackinForm/ Music/ Windirstat/ WindowTabs/ _Root/ 
+# dropbox status
+
+# Open url provided by 'dropbox status' to link computer to Dropbox.
+# Then exclude folders from syncing by running 'dropbox exlude add' inside ~/Drobox folder.
+
+# dropbox exclude add baretail/ baretailpro/ bc3/ bc4/ BeyondCompare/ BookNotes/ Books/ Camera\ Uploads/ colorpic/ DropboxApi/ Esad/ Express/ iOSdev/ Isos/ js_tests/ MarkPad/ minime/ Notes/ oem/ OneNote\ Notebooks/ Pictures/ Public/ titulo\ uanl/ TrackinForm/ Music/ Windirstat/ WindowTabs/ _Root/ 

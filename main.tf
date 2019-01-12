@@ -16,7 +16,7 @@ resource "aws_instance" "example" {
     volume_size = 16
   }
 
-  security_groups = [ "ssh_access", "rdp_access", "http_access" ] # these groups already exist
+  security_groups = [ "ssh_access", "rdp_access" ] # these groups already exist
 
   provisioner "remote-exec" {
     inline = ["sudo apt-get update"]
