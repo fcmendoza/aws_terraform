@@ -28,6 +28,7 @@
   file:
     path: /home/ubuntu/Dropbox/Videos/Yotevi
     state: directory
+    owner: ubuntu
 
 - name: Install Git
   apt:
@@ -74,7 +75,6 @@
     remote_src: yes
     owner: root
     group: root
-    #mode: -rw-r--r--
 
 - name: Restart Main Service
   systemd:
@@ -86,3 +86,9 @@
   systemd:
     name: youtubedl
     enabled: yes
+
+#- name: Run Dropbox as user ubuntu
+#  command: "python ~/dropbox.py start"
+#    become: yes
+#    become_user: ubuntu
+

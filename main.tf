@@ -12,6 +12,9 @@ resource "aws_instance" "example" {
   tags = {
     Name = "terransibuntupache"
   }
+  root_block_device = {
+    volume_size = 16
+  }
 
   security_groups = [ "ssh_access", "rdp_access", "http_access" ] # these groups already exist
 
