@@ -41,9 +41,17 @@
     state: latest
     update_cache: yes
 
-- name: Get files via Git
+- name: Create Github Key
+  copy:
+    content: "{{ lookup('file', '~/github_rsa_key') }}"
+    dest: /home/ubuntu/github_rsa_key
+    mode: 0600
+
+- name: Get Files From Git Through SSH
   git:
-    repo: 'https://github.com/fcmendoza/tubesc.git'
+    repo: ssh://git@github.com/fcmendoza/tubesc.git
+    accept_hostkey: yes
+    key_file: /home/ubuntu/github_rsa_key
     dest: /home/ubuntu/tunesc
     version: master
 
