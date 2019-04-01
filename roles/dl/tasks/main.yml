@@ -23,9 +23,9 @@
     path: /usr/local/bin/dropbox
     mode: +x
 
-- name: Extract dropbox-lnx.x86_64-64.4.141.tar.gz into /home/ubuntu
+- name: Extract dropbox-lnx.x86_64-65.4.177.tar.gz into /home/ubuntu
   unarchive:
-    src: /home/ubuntu/dropbox-lnx.x86_64-64.4.141.tar.gz
+    src: /home/ubuntu/dropbox-lnx.x86_64-65.4.177.tar.gz
     dest: /home/ubuntu
     remote_src: yes
 
