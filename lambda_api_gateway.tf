@@ -73,19 +73,37 @@ resource "aws_api_gateway_rest_api" "api_gateway_ref" {
   }
 }
 
-# resource "aws_api_gateway_resource" "api_gateway_ref_resource_ref" {
-#   rest_api_id = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
-#   parent_id   = "${aws_api_gateway_rest_api.api_gateway_ref.root_resource_id}"
-#   path_part   = "{proxy+}"
-# }
+resource "aws_api_gateway_resource" "api_gateway_ref_resource_ref" {
+  rest_api_id = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
+  parent_id   = "${aws_api_gateway_rest_api.api_gateway_ref.root_resource_id}"
+  path_part   = "{proxy+}"
+}
 
-# resource "aws_lambda_permission" "lambda_permission_ref" {
-#   //statement_id  = "AllowMyDemoAPIInvoke"
-#   action        = "lambda:InvokeFunction"
-#   function_name = "${aws_lambda_function.lambda_function_ref.function_name}"
-#   principal     = "apigateway.amazonaws.com"
+resource "aws_api_gateway_method" "api_gateway_method_ref" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
+  resource_id   = "${aws_api_gateway_resource.api_gateway_ref_resource_ref.id}"
+  http_method   = "ANY"
+  authorization = "NONE"
+#   request_parameters = {
+#     "method.request.path.proxy" = true
+#   }
+}
 
-#   # The /*/*/* part allows invocation from any stage, method and resource path
-#   # within API Gateway REST API.
-#   source_arn = "${aws_api_gateway_rest_api.api_gateway_ref.execution_arn}/*/*/*"
-# }
+resource "aws_api_gateway_integration" "integration" {
+  rest_api_id = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
+  resource_id = "${aws_api_gateway_resource.api_gateway_ref_resource_ref.id}"
+  http_method = "${aws_api_gateway_method.api_gateway_method_ref.http_method}"
+  integration_http_method = "ANY"
+  type                    = "AWS_PROXY" #LAMBDA_PROXY
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.lambda_function_ref.arn}/invocations"
+}
+
+resource "aws_lambda_permission" "lambda_permission_ref" {
+  //statement_id  = "AllowMyDemoAPIInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.lambda_function_ref.function_name}"
+  principal     = "apigateway.amazonaws.com"
+  # The /*/*/* part allows invocation from any stage, method and resource path
+  # within API Gateway REST API.
+  source_arn = "${aws_api_gateway_rest_api.api_gateway_ref.execution_arn}/*/*/*"
+}
