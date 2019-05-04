@@ -4,6 +4,15 @@ provider "aws" {
   region     = "${var.region}"
 }
 
+terraform {
+  backend "s3" {
+    bucket  = "dummy-lambdas-bucket"
+    key     = "terraform.tfstate"
+    region  = "us-west-1"
+    encrypt = true
+  }
+}
+
 resource "aws_instance" "example" {
   ami = "ami-063aa838bd7631e0b" # Ubuntu 18.04 LTS
   instance_type = "t2.micro"
