@@ -54,15 +54,17 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_lambda_function" "lambda_function_ref" {
-  filename         = "main.zip"
-  function_name    = "multiendpoint_go_lambda"
-  role             = "${aws_iam_role.iam_role_for_lambda_ref.arn}"
-  handler          = "main"
-  # The filebase64sha256() function is available in Terraform 0.11.12 and later
-  # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
-  # source_code_hash = "${base64sha256(file("main.zip"))}"
-  source_code_hash = "${filebase64sha256("main.zip")}"
-  runtime          = "go1.x"
+  function_name  = "multiendpoint_go_lambda"
+  s3_bucket      = "dummy-lambdas-bucket"
+  s3_key         = "main.zip"
+  handler        = "main"
+  runtime        = "go1.x"
+  role           = "${aws_iam_role.iam_role_for_lambda_ref.arn}"
+  tags = {
+      s3_bucket   = "s3://dummy-lambdas-bucket"
+      s3_filename = "main.zip"
+      timestamp   = "${timestamp()}"
+  }
 }
 
 resource "aws_api_gateway_rest_api" "api_gateway_ref" {
@@ -89,21 +91,32 @@ resource "aws_api_gateway_method" "api_gateway_method_ref" {
 #   }
 }
 
-resource "aws_api_gateway_integration" "integration" {
+resource "aws_api_gateway_integration" "api_gateway_integration_ref" {
   rest_api_id = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
   resource_id = "${aws_api_gateway_resource.api_gateway_ref_resource_ref.id}"
   http_method = "${aws_api_gateway_method.api_gateway_method_ref.http_method}"
-  integration_http_method = "ANY"
-  type                    = "AWS_PROXY" #LAMBDA_PROXY
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.lambda_function_ref.arn}/invocations"
+  integration_http_method = "POST" # Lambda function can only be invoked via POST.
+  type                    = "AWS_PROXY" # LAMBDA_PROXY
+  uri                     = "${aws_lambda_function.lambda_function_ref.invoke_arn}"
+  # uri is lambda's invoke_arn. e.g.: arn:aws:apigateway:us-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-1:349352983199:function:multiendpoint_go_lambda/invocations
 }
 
 resource "aws_lambda_permission" "lambda_permission_ref" {
-  //statement_id  = "AllowMyDemoAPIInvoke"
+  #statement_id  = "AllowMyDemoAPIInvoke"
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.lambda_function_ref.function_name}"
   principal     = "apigateway.amazonaws.com"
   # The /*/*/* part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   source_arn = "${aws_api_gateway_rest_api.api_gateway_ref.execution_arn}/*/*/*"
+  # source_arn' base is api gateways's "execution_arn". e.g.: arn:aws:execute-api:us-west-1:349352983199:0vc88vpz54
+}
+
+resource "aws_api_gateway_deployment" "api_gateway_deployment_ref" {
+  depends_on = [
+    "aws_api_gateway_integration.api_gateway_integration_ref"
+  ]
+
+  rest_api_id = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
+  stage_name  = "test"
 }
