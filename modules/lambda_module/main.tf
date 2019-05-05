@@ -63,7 +63,8 @@ resource "aws_lambda_function" "lambda_function_ref" {
   tags = {
       s3_bucket   = "s3://dummy-lambdas-bucket"
       s3_filename = "main.zip"
-      timestamp   = "${timestamp()}"
+      #timestamp   = "${timestamp()}"
+      timestamp   = "2019-05-05T04:12:52Z"
   }
 }
 
@@ -119,4 +120,71 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment_ref" {
 
   rest_api_id = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
   stage_name  = "test"
+}
+
+#
+# Create an ACM certificate
+#
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "api.losgatos.cloud"
+  validation_method = "DNS"
+  tags = {
+    Environment = "test"
+    Name = "api_losgatos_cloud_acm"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+data "aws_route53_zone" "zone" {
+  name         = "losgatos.cloud."
+  private_zone = false
+}
+
+resource "aws_route53_record" "aws_route53_record_cert_validation_ref" {
+  name    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_name}"
+  type    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_type}"
+  zone_id = "${data.aws_route53_zone.zone.id}"
+  records = ["${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"]
+  ttl     = 60
+}
+
+resource "aws_acm_certificate_validation" "aws_acm_cert_validation_ref" {
+  certificate_arn         = "${aws_acm_certificate.cert.arn}"
+  validation_record_fqdns = ["${aws_route53_record.aws_route53_record_cert_validation_ref.fqdn}"]
+}
+
+#
+# Create a custom domain name in API Gateway
+#
+
+resource "aws_api_gateway_domain_name" "domain" {
+  domain_name              = "api.losgatos.cloud"
+  regional_certificate_arn = "${aws_acm_certificate_validation.aws_acm_cert_validation_ref.certificate_arn}"
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+resource "aws_api_gateway_base_path_mapping" "base_path_mapping" {
+  api_id      = "${aws_api_gateway_rest_api.api_gateway_ref.id}"
+  domain_name = "${aws_api_gateway_domain_name.domain.domain_name}"
+  stage_name  = "${aws_api_gateway_deployment.api_gateway_deployment_ref.stage_name}"
+}
+
+#
+# Create an A Recordset in Route 53
+#
+
+resource "aws_route53_record" "aws_route53_record_for_api_gateway_ref" {
+  name    = "${aws_api_gateway_domain_name.domain.domain_name}"
+  type    = "A"
+  zone_id = "${data.aws_route53_zone.zone.id}"
+  alias {
+    evaluate_target_health = true
+    name                   = "${aws_api_gateway_domain_name.domain.regional_domain_name}"
+    zone_id                = "${aws_api_gateway_domain_name.domain.regional_zone_id}"
+  }
 }
