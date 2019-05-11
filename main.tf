@@ -20,3 +20,7 @@ module "lambda_module" {
 # module "ec2_module" {
 #   source = "./modules/ec2_module"
 # }
+
+module "load_balancer_module" {
+  source = "./modules/load_balancer_module"
+}
