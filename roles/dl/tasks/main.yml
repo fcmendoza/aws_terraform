@@ -12,7 +12,7 @@
 
 - name: Download Dropbox 
   get_url: url=https://www.dropbox.com/download?plat=lnx.x86_64 
-           dest=/home/ubuntu
+           dest=/home/ubuntu/dropbox-installer.tar.gz
 
 - name: Download Script to Manage Dropbox
   get_url: url=https://www.dropbox.com/download?dl=packages/dropbox.py 
@@ -23,9 +23,9 @@
     path: /usr/local/bin/dropbox
     mode: +x
 
-- name: Extract dropbox-lnx.x86_64-65.4.177.tar.gz into /home/ubuntu
+- name: Extract dropbox-installer.tar.gz into /home/ubuntu
   unarchive:
-    src: /home/ubuntu/dropbox-lnx.x86_64-65.4.177.tar.gz
+    src: /home/ubuntu/dropbox-installer.tar.gz
     dest: /home/ubuntu
     remote_src: yes
 
